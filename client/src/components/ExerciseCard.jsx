@@ -1,208 +1,169 @@
-import React, { useState } from 'react';
-import { 
-  Check, 
-  Trash2, 
-  ExternalLink, 
-  Info, 
-  Dumbbell,
-  Activity,
-  Star,
-  Clock
-} from 'lucide-react';
+// ===================================
+// 💪 Exercise Card Component
+// ===================================
+// Single exercise card - List la show pannatum
 
-const ExerciseCard = ({ 
-  exercise, 
-  isSelected, 
-  muscleInitial, 
-  muscleColor,
-  onSelect, 
-  onViewDetail 
+import React, { useState } from 'react';
+import { Trash2, Eye, Shuffle } from 'lucide-react';
+
+const ExerciseCard = ({
+  exercise,
+  onDelete,
+  onShuffle,
+  onViewDetails
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  // Get equipment icon
-  const getEquipmentIcon = (equipment) => {
-    const icons = {
-      'dumbbell': '🏋️',
-      'barbell': '🏋️‍♂️',
-      'machine': '🏗️',
-      'cable': '🔗',
-      'kettlebell': '🥛',
-      'body only': '💪',
-      'bands': '🔄',
+  const [imageError, setImageError] = useState(false);
+
+  // Muscle badge color mapping
+  const getMuscleColor = (muscle) => {
+    const colors = {
+      'Chest': 'bg-red-600',
+      'Back': 'bg-blue-600',
+      'Shoulders': 'bg-amber-600',
+      'Biceps': 'bg-purple-600',
+      'Triceps': 'bg-pink-600',
+      'Legs': 'bg-emerald-600',
+      'Abs': 'bg-yellow-600',
+      'Glutes': 'bg-orange-600',
     };
-    return icons[equipment.toLowerCase()] || '🏋️';
+    return colors[muscle] || 'bg-gray-600';
   };
-  
-  // Format difficulty stars
-  const renderDifficulty = (difficulty) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <Star
-          key={i}
-          className={`w-4 h-4 ${
-            i <= difficulty ? 'text-yellow-500 fill-yellow-500' : 'text-gray-600'
-          }`}
-        />
-      );
+
+  // Get first letter badge - Muscle identify pannatum
+  const getPrimaryMuscle = () => {
+    if (exercise.primaryMuscles && exercise.primaryMuscles.length > 0) {
+      return exercise.primaryMuscles[0];
     }
-    return stars;
+    return 'General';
   };
+
+  const primaryMuscle = getPrimaryMuscle();
+  const firstLetter = primaryMuscle.charAt(0).toUpperCase();
+
+  // ============================================
+  // Render
+  // ============================================
 
   return (
-    <div
-      className={`
-        relative overflow-hidden rounded-xl border-2 transition-all duration-300
-        ${isSelected 
-          ? 'border-red-500 bg-gradient-to-br from-gray-900 to-gray-800 transform scale-[1.02] shadow-2xl' 
-          : 'border-gray-800 bg-gray-900 hover:border-red-500/50 hover:shadow-xl'
-        }
-      `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Selection Indicator */}
-      <div className="absolute top-4 right-4 z-10">
-        <button
-          onClick={onSelect}
-          className={`
-            w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300
-            ${isSelected 
-              ? 'bg-red-500 text-white shadow-lg' 
-              : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-            }
-          `}
-        >
-          {isSelected ? <Check className="w-5 h-5" /> : '+'}
-        </button>
-      </div>
-      
-      {/* Muscle Initial Badge */}
-      <div className="absolute top-4 left-4 z-10">
-        <div className={`
-          w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl
-          ${muscleColor}
-          shadow-lg
-        `}>
-          {muscleInitial}
-        </div>
-      </div>
-      
-      {/* Exercise Image */}
-      <div className="h-48 overflow-hidden bg-gray-800 relative">
-        {exercise.images && exercise.images[0] ? (
+    <div className="card overflow-hidden group hover:scale-105 transition-transform duration-300">
+      {/* Image section */}
+      <div className="relative h-48 bg-gray-700 rounded-lg overflow-hidden mb-4">
+        {!imageError && exercise.imageUrl ? (
           <img
-            src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
+            src={exercise.imageUrl}
             alt={exercise.name}
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-            onError={(e) => {
-              e.target.src = `https://via.placeholder.com/400x300/1f2937/9ca3af?text=${encodeURIComponent(exercise.name)}`;
-            }}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            onError={() => setImageError(true)}
+            loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-            <Dumbbell className="w-16 h-16 text-gray-700" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
+            <div className="text-center">
+              <div className="text-4xl mb-2">💪</div>
+              <p className="text-gray-400 text-sm">Image not available</p>
+            </div>
           </div>
         )}
-        
-        {/* Image Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
+
+        {/* Overlay - Buttons show on hover */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+          <button
+            onClick={() => onViewDetails(exercise)}
+            className="btn btn-primary rounded-full p-3 hover:scale-110 transition-transform"
+            title="View exercise details"
+          >
+            <Eye size={20} />
+          </button>
+        </div>
       </div>
-      
-      {/* Exercise Content */}
-      <div className="p-6">
-        {/* Title and Equipment */}
-        <div className="mb-4">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="text-xl font-bold text-white line-clamp-2">
+
+      {/* Content section */}
+      <div className="space-y-3">
+        {/* Title with muscle badge */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              {/* Muscle initial badge */}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-sm ${getMuscleColor(primaryMuscle)}`}>
+                {firstLetter}
+              </div>
+              <span className="text-xs text-gray-400 font-medium">
+                {primaryMuscle}
+              </span>
+            </div>
+
+            {/* Exercise name */}
+            <h3 className="font-bold text-white text-lg group-hover:text-red-400 transition-colors line-clamp-2">
               {exercise.name}
             </h3>
           </div>
-          
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm text-gray-400 flex items-center gap-1">
-              <Dumbbell className="w-4 h-4" />
+        </div>
+
+        {/* Tags/Badges */}
+        <div className="flex flex-wrap gap-2">
+          {/* Category badge */}
+          {exercise.category && (
+            <span className="badge badge-secondary text-xs">
+              {exercise.category.charAt(0).toUpperCase() + exercise.category.slice(1)}
+            </span>
+          )}
+
+          {/* Equipment badge */}
+          {exercise.equipment && (
+            <span className="badge badge-neutral text-xs">
               {exercise.equipment}
             </span>
-            <span className="text-gray-600">•</span>
-            <span className="text-sm text-gray-400 flex items-center gap-1">
-              <Activity className="w-4 h-4" />
-              {exercise.category}
+          )}
+
+          {/* Difficulty badge */}
+          {exercise.difficulty && (
+            <span className={`badge text-xs ${
+              exercise.difficulty === 'beginner'
+                ? 'bg-emerald-600'
+                : exercise.difficulty === 'intermediate'
+                ? 'bg-amber-600'
+                : 'bg-red-700'
+            } text-white`}>
+              {exercise.difficulty}
             </span>
-          </div>
+          )}
         </div>
-        
-        {/* Primary Muscles */}
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
-            {exercise.primaryMuscles?.slice(0, 3).map((muscle) => (
-              <span
-                key={muscle}
-                className="px-3 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full border border-blue-500/30"
-              >
-                {muscle}
-              </span>
-            ))}
-            {exercise.primaryMuscles?.length > 3 && (
-              <span className="px-3 py-1 bg-gray-800 text-gray-400 text-xs rounded-full">
-                +{exercise.primaryMuscles.length - 3} more
-              </span>
-            )}
+
+        {/* Secondary muscles */}
+        {exercise.secondaryMuscles && exercise.secondaryMuscles.length > 0 && (
+          <div className="text-xs text-gray-400">
+            <p>Also targets: <span className="text-gray-300">{exercise.secondaryMuscles.join(', ')}</span></p>
           </div>
-        </div>
-        
-        {/* Difficulty and Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-800">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              {renderDifficulty(exercise.difficulty || 3)}
-            </div>
-            
-            {exercise.force && (
-              <span className={`
-                px-3 py-1 text-xs rounded-full font-medium
-                ${exercise.force === 'push' 
-                  ? 'bg-red-500/20 text-red-300' 
-                  : 'bg-blue-500/20 text-blue-300'
-                }
-              `}>
-                {exercise.force.toUpperCase()}
-              </span>
-            )}
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onViewDetail}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors duration-300"
-              title="View Details"
-            >
-              <Info className="w-5 h-5" />
-            </button>
-            
-            <button
-              onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name)}`, '_blank')}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors duration-300"
-              title="Search on YouTube"
-            >
-              <ExternalLink className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-        
-        {/* Instructions Preview */}
-        <div className="mt-4">
-          <p className="text-sm text-gray-400 line-clamp-2">
-            {exercise.instructions?.[0] || 'No instructions available.'}
-          </p>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex gap-2 pt-2 border-t border-gray-700">
+          <button
+            onClick={() => onViewDetails(exercise)}
+            className="flex-1 btn btn-primary rounded-lg py-2 text-sm font-semibold flex items-center justify-center gap-2"
+            title="View exercise details and instructions"
+          >
+            <Eye size={16} />
+            <span className="hidden sm:inline">Details</span>
+          </button>
+
+          <button
+            onClick={() => onShuffle()}
+            className="btn btn-secondary rounded-lg py-2 px-3"
+            title="Shuffle exercise order"
+          >
+            <Shuffle size={16} />
+          </button>
+
+          <button
+            onClick={() => onDelete(exercise._id)}
+            className="btn bg-red-900/50 hover:bg-red-900 text-red-200 rounded-lg py-2 px-3 transition-all"
+            title="Remove exercise from list"
+          >
+            <Trash2 size={16} />
+          </button>
         </div>
       </div>
-      
-      {/* Hover Effect */}
-      {isHovered && !isSelected && (
-        <div className="absolute inset-0 border-2 border-red-500/30 rounded-xl pointer-events-none" />
-      )}
     </div>
   );
 };

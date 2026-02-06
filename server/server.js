@@ -1,40 +1,138 @@
+// ===================================
+// 💪 Muscle Dynamics - Backend Server
+// ===================================
+// MERN stack backend - Node.js + Express + MongoDB
+// Tamizh+English Comments
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
+// Initialize Express app
 const app = express();
-app.use(cors());
+
+// ============================================
+// Middleware Setup - Backend Request Handlers
+// ============================================
+
+// CORS - Cross-Origin Resource Sharing (React frontend aala request accept pannanum)
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://your-frontend-url.com' 
+    : 'http://localhost:3000',
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
+
+// JSON body parser (Request body la JSON data extract pannanum)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// MongoDB connection
-const mongoURI = 'mongodb+srv://pradeep:kumar@exercises.ynfifll.mongodb.net/fitness?retryWrites=true&w=majority';
+// ============================================
+// MongoDB Connection - Database Setup
+// ============================================
 
-mongoose.connect(mongoURI)
-  .then(() => console.log('✅ MongoDB connected successfully!'))
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
-    console.log('⚠️  Starting server without database connection...');
-  });
+const connectDB = async () => {
+  try {
+    // MongoDB Atlas la connect pannanum
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('✅ MongoDB Connected Successfully');
+    console.log(`📁 Database: ${mongoose.connection.db.getName()}`);
+  } catch (error) {
+    console.error('❌ MongoDB Connection Error:', error.message);
+    process.exit(1); // Process stop pannanum failure case la
+  }
+};
 
-// Routes
-const Exercise = mongoose.model('Exercise', require('./models/Exercise'));
-const exerciseRoutes = require('./routes/exercises');
-app.use('/api/exercises', exerciseRoutes);
+// Database connection attempt pannanum
+connectDB();
 
-// Health check
+// ============================================
+// Routes - API Endpoints
+// ============================================
+
+// Exercises routes import pannanum
+const exercisesRouter = require('./routes/exercises');
+
+// API routes mount pannanum
+app.use('/api/exercises', exercisesRouter);
+
+// Health check endpoint (Server running innukku verify pannanum)
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' 
+  res.json({
+    status: 'OK',
+    message: 'Muscle Dynamics Server Running',
+    timestamp: new Date().toISOString()
   });
 });
 
-// Simple test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Server is working!' });
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Muscle Dynamics API',
+    version: '1.0.0',
+    endpoints: {
+      exercises: '/api/exercises?muscles=Chest&equipment=Dumbbell',
+      health: '/api/health'
+    }
+  });
 });
 
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+// ============================================
+// Error Handling Middleware
+// ============================================
+
+// 404 - Route not found
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Route not found',
+    path: req.path,
+    method: req.method
+  });
 });
+
+// Error handling middleware - All errors yaha handle pannanum
+app.use((err, req, res, next) => {
+  console.error('❌ Error:', err.message);
+  
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error',
+    status: err.status || 500
+  });
+});
+
+// ============================================
+// Server Start - Listen pannanum
+// ============================================
+
+const PORT = process.env.PORT || 5000;
+
+const server = app.listen(PORT, () => {
+  console.log(`
+╔════════════════════════════════════════╗
+║   💪 MUSCLE DYNAMICS - Backend Server   ║
+╠════════════════════════════════════════╣
+║ Server: http://localhost:${PORT}         ║
+║ Env: ${process.env.NODE_ENV || 'development'}        ║
+║ DB: MongoDB Atlas Connected            ║
+╚════════════════════════════════════════╝
+  `);
+});
+
+// Graceful shutdown - Server stop pannanum properly
+process.on('SIGTERM', () => {
+  console.log('\n🛑 SIGTERM received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    mongoose.connection.close(false, () => {
+      console.log('✅ MongoDB connection closed');
+      process.exit(0);
+    });
+  });
+});
+
+module.exports = app;

@@ -1,116 +1,165 @@
-import React, { useState } from 'react';
-import { Search, Filter, Check } from 'lucide-react';
+// ===================================
+// 💪 Equipment Selector Component
+// ===================================
+// Step 1 - Gym equipment selection with icons
 
-const EquipmentSelector = ({ equipment, selectedEquipment, onSelect }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  
+import React from 'react';
+import {
+  Dumbbell,
+  Weight,
+  Zap,
+  Couch,
+  Wind,
+  Circle,
+  ArrowRight,
+  Info
+} from 'lucide-react';
+
+const EquipmentSelector = ({
+  equipmentList,
+  selectedEquipment,
+  onSelect,
+  onContinue
+}) => {
+  // ============================================
+  // Equipment icon mapping
+  // ============================================
+
   const equipmentIcons = {
-    'dumbbell': '🏋️',
-    'barbell': '🏋️‍♂️',
-    'machine': '🏗️',
-    'cable': '🔗',
-    'kettlebell': '🥛',
-    'body only': '💪',
-    'bands': '🔄',
-    'medicine ball': '🏐',
-    'exercise ball': '🎱',
-    'e-z curl bar': '📊',
-    'foam roll': '🌀',
+    'Dumbbell': Dumbbell,
+    'Barbell': Weight,
+    'Kettlebell': Circle,
+    'Machine': Zap,
+    'Cable': Wind,
+    'Bench': Couch,
+    'Bodyweight': Circle,
+    'Medicine Ball': Circle,
+    'EZ Bar': Weight,
+    'Resistance Band': Wind,
+    'Smith Machine': Zap,
+    'Foam Roll': Circle,
+    'Pull-up Bar': Circle,
+    'Trap Bar': Weight,
   };
-  
-  const filteredEquipment = equipment.filter(item =>
-    item.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  // Get icon for equipment - Default use pannatum
+  const getIcon = (equipment) => {
+    const Icon = equipmentIcons[equipment] || Dumbbell;
+    return Icon;
+  };
+
+  // ============================================
+  // Render
+  // ============================================
 
   return (
-    <div className="card animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-2">Select Equipment</h2>
-          <p className="text-gray-400">
-            Choose the equipment you have access to. You can select multiple options.
-          </p>
-        </div>
-        <div className="text-red-500 bg-red-500/10 p-3 rounded-lg">
-          <Filter className="w-8 h-8" />
-        </div>
-      </div>
-      
-      {/* Search */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search equipment..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-field w-full pl-12"
-          />
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-3">
+        <h2 className="text-3xl md:text-4xl font-bold text-white">
+          Choose Your Equipment
+        </h2>
+        <p className="text-gray-400 text-lg">
+          Select the gym equipment available to you. You can choose multiple options.
+        </p>
+        <div className="inline-flex items-center gap-2 bg-blue-600/20 border border-blue-600 text-blue-200 px-4 py-2 rounded-lg text-sm">
+          <Info size={16} />
+          <span>Select at least one equipment to continue</span>
         </div>
       </div>
-      
-      {/* Equipment Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filteredEquipment.map((item) => {
-          const isSelected = selectedEquipment.includes(item);
-          const icon = equipmentIcons[item.toLowerCase()] || '🏋️';
-          
-          return (
-            <button
-              key={item}
-              onClick={() => onSelect(item)}
-              className={`
-                relative p-4 rounded-xl border-2 transition-all duration-300
-                ${isSelected 
-                  ? 'bg-red-500/10 border-red-500 transform scale-105' 
-                  : 'bg-gray-800/50 border-gray-700 hover:border-red-500/50 hover:bg-gray-800'
-                }
-                group
-              `}
-            >
-              {isSelected && (
-                <div className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              )}
-              
-              <div className="text-3xl mb-3">{icon}</div>
-              
-              <div className="text-left">
-                <h3 className="font-semibold text-white mb-1 capitalize">
-                  {item}
-                </h3>
-                <p className="text-xs text-gray-400">
-                  {isSelected ? 'Selected' : 'Click to select'}
-                </p>
-              </div>
-              
-              {/* Hover effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-            </button>
-          );
-        })}
-      </div>
-      
-      {/* Selected Equipment Summary */}
-      {selectedEquipment.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-gray-800">
-          <h3 className="text-lg font-semibold text-white mb-3">
-            Selected Equipment ({selectedEquipment.length})
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {selectedEquipment.map((item) => (
-              <span
-                key={item}
-                className="muscle-badge bg-red-500/20 text-red-300 border border-red-500/30"
+
+      {/* Equipment grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {equipmentList.length > 0 ? (
+          equipmentList.map((equipment) => {
+            const Icon = getIcon(equipment);
+            const isSelected = selectedEquipment.includes(equipment);
+
+            return (
+              <button
+                key={equipment}
+                onClick={() => onSelect(equipment)}
+                className={`card-sm group cursor-pointer flex flex-col items-center justify-center gap-3 py-6 transition-all duration-300 ${
+                  isSelected
+                    ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/50'
+                    : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-red-600'
+                }`}
+                title={`Select ${equipment}`}
               >
-                {equipmentIcons[item.toLowerCase()] || '🏋️'} {item}
-              </span>
+                {/* Icon */}
+                <div className={`p-3 rounded-lg transition-all ${
+                  isSelected
+                    ? 'bg-red-700'
+                    : 'bg-gray-700 group-hover:bg-red-600/20'
+                }`}>
+                  <Icon size={28} />
+                </div>
+
+                {/* Label */}
+                <p className="font-semibold text-sm text-center leading-tight">
+                  {equipment}
+                </p>
+
+                {/* Checkmark for selected */}
+                {isSelected && (
+                  <div className="absolute top-2 right-2 bg-white text-red-600 w-6 h-6 rounded-full flex items-center justify-center font-bold">
+                    ✓
+                  </div>
+                )}
+              </button>
+            );
+          })
+        ) : (
+          <div className="col-span-full text-center py-12">
+            <p className="text-gray-400">Loading equipment options...</p>
+          </div>
+        )}
+      </div>
+
+      {/* Selected summary */}
+      {selectedEquipment.length > 0 && (
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 space-y-4">
+          <h3 className="font-semibold text-white">Selected Equipment:</h3>
+          <div className="flex flex-wrap gap-2">
+            {selectedEquipment.map((equipment) => (
+              <div
+                key={equipment}
+                className="badge bg-red-600 text-white hover-lift cursor-pointer"
+                onClick={() => onSelect(equipment)}
+                title={`Click to remove ${equipment}`}
+              >
+                {equipment} ✕
+              </div>
             ))}
           </div>
         </div>
       )}
+
+      {/* Continue button */}
+      <div className="flex gap-4 justify-center">
+        <button
+          onClick={onContinue}
+          disabled={selectedEquipment.length === 0}
+          className={`btn px-8 py-3 text-lg font-semibold rounded-lg flex items-center gap-3 transition-all ${
+            selectedEquipment.length === 0
+              ? 'btn-disabled'
+              : 'btn-primary hover:shadow-lg hover:shadow-red-600/50'
+          }`}
+        >
+          <span>Continue</span>
+          <ArrowRight size={20} />
+        </button>
+      </div>
+
+      {/* Info section */}
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-gray-300 text-sm space-y-2">
+        <h4 className="font-semibold text-white mb-3">💡 Tips:</h4>
+        <ul className="space-y-1 list-disc list-inside">
+          <li>Select multiple equipment types for more exercise variety</li>
+          <li>You can mix equipment selections (e.g., Dumbbells + Barbells)</li>
+          <li>Each equipment unlocks different exercise variations</li>
+        </ul>
+      </div>
     </div>
   );
 };

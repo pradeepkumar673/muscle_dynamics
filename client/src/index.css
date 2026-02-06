@@ -1,55 +1,253 @@
-/* Remove all Tailwind CSS directives and replace with: */
+/* ===================================
+   💪 Muscle Dynamics - Global Styles
+   ===================================
+   Tailwind CSS + Custom styles
+   Dark theme with red accent colors
+*/
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* ===================================
+   Custom Base Styles
+   ===================================
+*/
+
+* {
+  @apply box-border;
+}
+
+html, body {
+  @apply m-0 p-0 bg-gray-900 text-white overflow-x-hidden;
+}
 
 body {
-  margin: 0;
+  @apply font-sans antialiased;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0f172a;
-  color: white;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* ===================================
+   Scrollbar Customization
+   ===================================
+*/
+
+::-webkit-scrollbar {
+  @apply w-2 h-2;
 }
 
-/* Basic utility classes */
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-red-600 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-red-700;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-color: #DC2626 #1F2937;
+  scrollbar-width: thin;
+}
+
+/* ===================================
+   Component Styles
+   ===================================
+*/
+
+/* Button styles */
+.btn {
+  @apply px-4 py-2 rounded-lg font-semibold transition-all duration-200 cursor-pointer;
+}
+
 .btn-primary {
-  background-color: #dc2626;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 16px;
+  @apply bg-red-600 text-white hover:bg-red-700 active:scale-95;
 }
 
-.btn-primary:hover {
-  background-color: #b91c1c;
+.btn-secondary {
+  @apply bg-gray-700 text-white hover:bg-gray-600;
 }
 
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.btn-outline {
+  @apply border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white;
 }
 
+.btn-disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Card styles */
 .card {
-  background-color: #1f2937;
-  border: 1px solid #374151;
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 24px;
+  @apply bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-lg transition-all duration-300;
 }
 
+.card:hover {
+  @apply border-red-600 shadow-xl shadow-red-600/10;
+}
+
+.card-sm {
+  @apply bg-gray-800 rounded-lg border border-gray-700 p-4;
+}
+
+/* Badge styles */
+.badge {
+  @apply inline-block px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap;
+}
+
+.badge-primary {
+  @apply bg-red-600 text-white;
+}
+
+.badge-secondary {
+  @apply bg-blue-600 text-white;
+}
+
+.badge-success {
+  @apply bg-emerald-600 text-white;
+}
+
+.badge-neutral {
+  @apply bg-gray-700 text-gray-200;
+}
+
+/* Input styles */
 .input-field {
-  background-color: #1f2937;
-  border: 1px solid #374151;
-  border-radius: 8px;
-  padding: 12px 16px;
-  color: white;
-  width: 100%;
+  @apply w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20 transition-colors;
+}
+
+.input-field:focus {
+  @apply border-red-600;
+}
+
+/* Label styles */
+.label {
+  @apply block text-sm font-medium text-gray-300 mb-2;
+}
+
+/* ===================================
+   Animation & Transition
+   ===================================
+*/
+
+@keyframes slideInDown {
+  from {
+    @apply opacity-0 -translate-y-4;
+  }
+  to {
+    @apply opacity-100 translate-y-0;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    @apply opacity-0 translate-y-4;
+  }
+  to {
+    @apply opacity-100 translate-y-0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    @apply opacity-0;
+  }
+  to {
+    @apply opacity-100;
+  }
+}
+
+.animate-slide-in-down {
+  animation: slideInDown 0.3s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ===================================
+   Utility Classes
+   ===================================
+*/
+
+.text-gradient {
+  @apply bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent;
+}
+
+.shadow-red {
+  @apply shadow-lg shadow-red-600/20;
+}
+
+.shadow-blue {
+  @apply shadow-lg shadow-blue-600/20;
+}
+
+.border-red {
+  @apply border border-red-600;
+}
+
+.border-blue {
+  @apply border border-blue-500;
+}
+
+.hover-lift {
+  @apply transition-transform duration-200 hover:-translate-y-1;
+}
+
+.divider {
+  @apply h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent;
+}
+
+/* ===================================
+   Responsive adjustments
+   ===================================
+*/
+
+@media (max-width: 768px) {
+  .card {
+    @apply p-4;
+  }
+
+  .btn {
+    @apply text-sm px-3 py-2;
+  }
+}
+
+/* ===================================
+   Accessibility
+   ===================================
+*/
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-red-600;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    @apply animate-none transition-none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .btn-primary {
+    @apply border-2 border-white;
+  }
+
+  .card {
+    @apply border-2 border-white;
+  }
 }

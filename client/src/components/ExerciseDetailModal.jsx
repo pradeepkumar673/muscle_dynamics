@@ -1,332 +1,279 @@
+// ===================================
+// 💪 Exercise Detail Modal Component
+// ===================================
+// Full exercise details with instructions
+
 import React, { useState } from 'react';
-import { 
-  X, 
-  Play, 
-  Pause, 
-  RotateCcw,
-  Dumbbell,
-  Activity,
-  Target,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  Star
-} from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react';
 
 const ExerciseDetailModal = ({ exercise, onClose }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   if (!exercise) return null;
 
-  const equipmentIcons = {
-    'dumbbell': '🏋️',
-    'barbell': '🏋️‍♂️',
-    'machine': '🏗️',
-    'cable': '🔗',
-    'kettlebell': '🥛',
-    'body only': '💪',
-    'bands': '🔄',
-  };
-
-  const getEquipmentIcon = (equipment) => {
-    return equipmentIcons[equipment.toLowerCase()] || '🏋️';
-  };
+  // ============================================
+  // Handlers
+  // ============================================
 
   const handlePrevImage = () => {
-    setCurrentImageIndex(prev => 
-      prev === 0 ? (exercise.images?.length || 1) - 1 : prev - 1
-    );
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
   };
 
   const handleNextImage = () => {
-    setCurrentImageIndex(prev => 
-      prev === (exercise.images?.length || 1) - 1 ? 0 : prev + 1
-    );
+    if (currentImageIndex < (exercise.allImages?.length || 0) - 1) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
   };
 
-  const handlePrevStep = () => {
-    setCurrentStep(prev => prev === 0 ? exercise.instructions.length - 1 : prev - 1);
+  const handleSpeakInstructions = (text) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
   };
 
-  const handleNextStep = () => {
-    setCurrentStep(prev => prev === exercise.instructions.length - 1 ? 0 : prev + 1);
+  // Get color for muscle badge
+  const getMuscleColor = (muscle) => {
+    const colors = {
+      'Chest': 'bg-red-600',
+      'Back': 'bg-blue-600',
+      'Shoulders': 'bg-amber-600',
+      'Biceps': 'bg-purple-600',
+      'Triceps': 'bg-pink-600',
+      'Legs': 'bg-emerald-600',
+      'Abs': 'bg-yellow-600',
+      'Glutes': 'bg-orange-600',
+      'Forearms': 'bg-teal-600',
+      'Hamstrings': 'bg-violet-600',
+      'Lats': 'bg-sky-600',
+      'Calves': 'bg-indigo-600',
+      'Traps': 'bg-purple-600',
+    };
+    return colors[muscle] || 'bg-gray-600';
   };
 
-  const imageUrl = exercise.images && exercise.images[currentImageIndex]
-    ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[currentImageIndex]}`
-    : `https://via.placeholder.com/600x400/1f2937/9ca3af?text=${encodeURIComponent(exercise.name)}`;
+  // ============================================
+  // Render
+  // ============================================
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl">
-        
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors duration-300"
-        >
-          <X className="w-6 h-6" />
-        </button>
-        
-        {/* Header */}
-        <div className="p-6 border-b border-gray-800">
-          <div className="flex items-start gap-4">
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold text-white mb-2">{exercise.name}</h2>
-              
-              <div className="flex flex-wrap items-center gap-4 mb-4">
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Dumbbell className="w-5 h-5" />
-                  <span>{exercise.equipment}</span>
-                </div>
-                
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Activity className="w-5 h-5" />
-                  <span className="capitalize">{exercise.category}</span>
-                </div>
-                
-                {exercise.level && (
-                  <div className="px-3 py-1 bg-yellow-500/20 text-yellow-300 text-sm rounded-full">
-                    {exercise.level}
-                  </div>
-                )}
-              </div>
-              
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2">
-                {exercise.primaryMuscles?.map((muscle) => (
-                  <span
-                    key={muscle}
-                    className="px-3 py-1 bg-blue-500/20 text-blue-300 text-sm rounded-full border border-blue-500/30"
-                  >
-                    {muscle}
-                  </span>
-                ))}
-                
-                {exercise.secondaryMuscles?.map((muscle) => (
-                  <span
-                    key={muscle}
-                    className="px-3 py-1 bg-green-500/20 text-green-300 text-sm rounded-full border border-green-500/30"
-                  >
-                    {muscle}
-                  </span>
-                ))}
-                
-                {exercise.mechanic && (
-                  <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full border border-purple-500/30">
-                    {exercise.mechanic}
-                  </span>
-                )}
-              </div>
-            </div>
-            
-            <div className="text-right">
-              <div className="text-4xl mb-2">
-                {getEquipmentIcon(exercise.equipment)}
-              </div>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`w-4 h-4 ${
-                      star <= (exercise.difficulty || 3) 
-                        ? 'text-yellow-500 fill-yellow-500' 
-                        : 'text-gray-600'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in">
+      {/* Modal container */}
+      <div className="bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-700">
+        {/* Header with close button */}
+        <div className="sticky top-0 bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-white">{exercise.name}</h1>
+          <button
+            onClick={onClose}
+            className="btn bg-gray-700 hover:bg-gray-600 rounded-full p-2 transition-all"
+            title="Close"
+          >
+            <X size={24} />
+          </button>
         </div>
-        
+
         {/* Content */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            {/* Left Column - Images */}
-            <div>
-              <div className="relative rounded-xl overflow-hidden bg-gray-800 mb-4">
+        <div className="px-6 py-6 space-y-6">
+          {/* Image carousel */}
+          {exercise.allImages && exercise.allImages.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-white">Exercise Form</h2>
+              <div className="relative bg-gray-700 rounded-lg overflow-hidden group">
                 <img
-                  src={imageUrl}
+                  src={exercise.allImages[currentImageIndex]}
                   alt={`${exercise.name} - Step ${currentImageIndex + 1}`}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-96 object-cover"
                 />
-                
-                {/* Image Navigation */}
-                {exercise.images && exercise.images.length > 1 && (
+
+                {/* Navigation buttons */}
+                {exercise.allImages.length > 1 && (
                   <>
+                    {/* Previous button */}
                     <button
                       onClick={handlePrevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70"
+                      disabled={currentImageIndex === 0}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 btn bg-black/50 hover:bg-black/70 rounded-full p-2 transition-all disabled:opacity-30"
                     >
-                      <ChevronLeft className="w-6 h-6" />
+                      <ChevronLeft size={24} />
                     </button>
-                    
+
+                    {/* Next button */}
                     <button
                       onClick={handleNextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70"
+                      disabled={currentImageIndex === exercise.allImages.length - 1}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 btn bg-black/50 hover:bg-black/70 rounded-full p-2 transition-all disabled:opacity-30"
                     >
-                      <ChevronRight className="w-6 h-6" />
+                      <ChevronRight size={24} />
                     </button>
-                    
-                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                      {exercise.images.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                            index === currentImageIndex 
-                              ? 'bg-red-500' 
-                              : 'bg-gray-600 hover:bg-gray-400'
-                          }`}
-                        />
-                      ))}
+
+                    {/* Image counter */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      {currentImageIndex + 1} / {exercise.allImages.length}
                     </div>
                   </>
                 )}
               </div>
-              
-              {/* YouTube Search Button */}
-              <button
-                onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.name)}`, '_blank')}
-                className="w-full btn-primary flex items-center justify-center gap-2"
-              >
-                <ExternalLink className="w-5 h-5" />
-                Watch Tutorial on YouTube
-              </button>
             </div>
-            
-            {/* Right Column - Instructions */}
-            <div>
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Target className="w-6 h-6 text-red-500" />
-                  Instructions
-                </h3>
-                
-                {/* Steps Navigation */}
-                <div className="flex items-center justify-between mb-4">
-                  <button
-                    onClick={handlePrevStep}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg"
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </button>
-                  
-                  <div className="text-center">
-                    <span className="text-sm text-gray-400">Step</span>
-                    <div className="text-2xl font-bold text-white">
-                      {currentStep + 1} / {exercise.instructions.length}
-                    </div>
+          )}
+
+          {/* Info section */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {/* Equipment */}
+            <div className="bg-gray-700 rounded-lg p-4">
+              <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Equipment</p>
+              <p className="font-semibold text-white">{exercise.equipment}</p>
+            </div>
+
+            {/* Category */}
+            {exercise.category && (
+              <div className="bg-gray-700 rounded-lg p-4">
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Category</p>
+                <p className="font-semibold text-white capitalize">{exercise.category}</p>
+              </div>
+            )}
+
+            {/* Difficulty */}
+            {exercise.difficulty && (
+              <div className="bg-gray-700 rounded-lg p-4">
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Difficulty</p>
+                <p className={`font-semibold capitalize ${
+                  exercise.difficulty === 'beginner'
+                    ? 'text-emerald-400'
+                    : exercise.difficulty === 'intermediate'
+                    ? 'text-amber-400'
+                    : 'text-red-400'
+                }`}>
+                  {exercise.difficulty}
+                </p>
+              </div>
+            )}
+
+            {/* Recommended Reps */}
+            {exercise.reps && (
+              <div className="bg-gray-700 rounded-lg p-4">
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Reps</p>
+                <p className="font-semibold text-white">{exercise.reps}</p>
+              </div>
+            )}
+
+            {/* Sets */}
+            {exercise.sets && (
+              <div className="bg-gray-700 rounded-lg p-4">
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Sets</p>
+                <p className="font-semibold text-white">{exercise.sets}</p>
+              </div>
+            )}
+
+            {/* Rest time */}
+            {exercise.restSeconds && (
+              <div className="bg-gray-700 rounded-lg p-4">
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Rest Time</p>
+                <p className="font-semibold text-white">{exercise.restSeconds}s</p>
+              </div>
+            )}
+          </div>
+
+          {/* Muscles targeted */}
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold text-white">Muscles Targeted</h2>
+            <div className="space-y-2">
+              {/* Primary muscles */}
+              {exercise.primaryMuscles && exercise.primaryMuscles.length > 0 && (
+                <div>
+                  <p className="text-gray-400 text-sm mb-2 font-medium">Primary:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {exercise.primaryMuscles.map((muscle) => (
+                      <span
+                        key={muscle}
+                        className={`badge text-white ${getMuscleColor(muscle)}`}
+                      >
+                        {muscle}
+                      </span>
+                    ))}
                   </div>
-                  
-                  <button
-                    onClick={handleNextStep}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg"
+                </div>
+              )}
+
+              {/* Secondary muscles */}
+              {exercise.secondaryMuscles && exercise.secondaryMuscles.length > 0 && (
+                <div>
+                  <p className="text-gray-400 text-sm mb-2 font-medium">Secondary:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {exercise.secondaryMuscles.map((muscle) => (
+                      <span
+                        key={muscle}
+                        className="badge bg-gray-700 text-gray-300"
+                      >
+                        {muscle}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Instructions */}
+          {exercise.instructions && exercise.instructions.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-white">Step-by-Step Instructions</h2>
+                <button
+                  onClick={() => handleSpeakInstructions(exercise.instructions.join('. '))}
+                  className="btn bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 flex items-center gap-2 text-sm"
+                  title="Listen to instructions"
+                >
+                  <Volume2 size={16} />
+                  <span className="hidden sm:inline">Listen</span>
+                </button>
+              </div>
+
+              <ol className="space-y-3">
+                {exercise.instructions.map((instruction, index) => (
+                  <li
+                    key={index}
+                    className="flex gap-4 bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors cursor-pointer group"
+                    onClick={() => handleSpeakInstructions(instruction)}
+                    title="Click to hear this step"
                   >
-                    <ChevronRight className="w-6 h-6" />
-                  </button>
-                </div>
-                
-                {/* Current Instruction */}
-                <div className="bg-gray-800 rounded-xl p-6 min-h-[150px]">
-                  <p className="text-white text-lg">
-                    {exercise.instructions[currentStep]}
-                  </p>
-                </div>
-                
-                {/* Steps Dots */}
-                <div className="flex justify-center gap-2 mt-4">
-                  {exercise.instructions.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentStep(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                        index === currentStep 
-                          ? 'bg-red-500' 
-                          : 'bg-gray-600 hover:bg-gray-400'
-                      }`}
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <p className="text-gray-300 text-sm flex-1">
+                      {instruction}
+                    </p>
+                    <Volume2
+                      size={16}
+                      className="text-gray-500 group-hover:text-red-500 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
                     />
-                  ))}
-                </div>
-              </div>
-              
-              {/* Play/Pause Controls */}
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="p-4 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors duration-300"
-                >
-                  {isPlaying ? (
-                    <Pause className="w-6 h-6" />
-                  ) : (
-                    <Play className="w-6 h-6" />
-                  )}
-                </button>
-                
-                <button
-                  onClick={() => setCurrentStep(0)}
-                  className="p-4 bg-gray-800 hover:bg-gray-700 text-white rounded-full transition-colors duration-300"
-                >
-                  <RotateCcw className="w-6 h-6" />
-                </button>
-              </div>
+                  </li>
+                ))}
+              </ol>
             </div>
-          </div>
-          
-          {/* Additional Info */}
-          <div className="mt-8 pt-6 border-t border-gray-800">
-            <h3 className="text-xl font-bold text-white mb-4">Exercise Details</h3>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gray-800 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">Force Type</div>
-                <div className="text-white font-semibold capitalize">
-                  {exercise.force || 'N/A'}
-                </div>
-              </div>
-              
-              <div className="bg-gray-800 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">Mechanic</div>
-                <div className="text-white font-semibold capitalize">
-                  {exercise.mechanic || 'N/A'}
-                </div>
-              </div>
-              
-              <div className="bg-gray-800 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">Level</div>
-                <div className="text-white font-semibold capitalize">
-                  {exercise.level || 'Intermediate'}
-                </div>
-              </div>
-              
-              <div className="bg-gray-800 rounded-lg p-4">
-                <div className="text-gray-400 text-sm mb-1">Rating</div>
-                <div className="text-white font-semibold">
-                  {(exercise.rating || 4).toFixed(1)}/5
-                </div>
-              </div>
+          )}
+
+          {/* Description */}
+          {exercise.description && (
+            <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-white">Description</h2>
+              <p className="text-gray-300 leading-relaxed">
+                {exercise.description}
+              </p>
             </div>
-          </div>
+          )}
         </div>
-        
+
         {/* Footer */}
-        <div className="p-6 border-t border-gray-800 bg-gray-900/50 rounded-b-2xl">
-          <div className="flex justify-between items-center">
-            <div className="text-gray-400 text-sm">
-              Exercise ID: {exercise._id?.slice(-8) || 'N/A'}
-            </div>
-            
-            <button
-              onClick={onClose}
-              className="btn-primary"
-            >
-              Close
-            </button>
-          </div>
+        <div className="border-t border-gray-700 px-6 py-4 flex justify-center bg-gray-800">
+          <button
+            onClick={onClose}
+            className="btn btn-primary px-8 py-2 rounded-lg font-semibold"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>

@@ -1,482 +1,556 @@
-/*import React, { useState } from 'react';
-import Body from 'react-body-highlighter';
-import { Search, X, AlertCircle } from 'lucide-react';
+// ===================================
+// 💪 Muscle Selector Component
+// ===================================
+// Step 2 - Interactive anatomy map + muscle selection
 
-const MuscleSelector = ({ muscles, selectedMuscles, onSelect }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  // Muscle groups with colors and data mappings
+import React, { useState } from 'react';
+import { Click2, ArrowRight, Info } from 'lucide-react';
+
+const MuscleSelector = ({
+  muscleList,
+  selectedMuscles,
+  onSelect,
+  onContinue,
+  loading
+}) => {
+  // ============================================
+  // Muscle color mapping
+  // ============================================
+
+  const muscleColors = {
+    'Chest': '#DC2626',      // red-600
+    'Back': '#3B82F6',       // blue-500
+    'Shoulders': '#F59E0B',  // amber-500
+    'Biceps': '#8B5CF6',     // violet-500
+    'Triceps': '#EC4899',    // pink-500
+    'Forearms': '#14B8A6',   // teal-500
+    'Legs': '#10B981',       // emerald-500
+    'Quadriceps': '#06B6D4', // cyan-500
+    'Hamstrings': '#A855F7', // purple-500
+    'Glutes': '#F97316',     // orange-500
+    'Calves': '#6366F1',     // indigo-500
+    'Abs': '#FBBF24',        // amber-400
+    'Obliques': '#FB923C',   // orange-400
+    'Lats': '#0EA5E9',       // sky-500
+    'Traps': '#8B5CF6',      // violet-500
+  };
+
+  // Muscle groups organize pannatum (Front/Back/Full)
   const muscleGroups = {
-    // Front muscles
-    'pectorals': { side: 'front', color: '#3B82F6', label: 'Chest' },
-    'abdominals': { side: 'front', color: '#10B981', label: 'Abs' },
-    'quadriceps': { side: 'front', color: '#8B5CF6', label: 'Quads' },
-    'biceps': { side: 'front', color: '#EF4444', label: 'Biceps' },
-    'shoulders': { side: 'front', color: '#F59E0B', label: 'Shoulders' },
-    'forearms': { side: 'front', color: '#EC4899', label: 'Forearms' },
-    
-    // Back muscles
-    'lats': { side: 'back', color: '#3B82F6', label: 'Lats' },
-    'traps': { side: 'back', color: '#10B981', label: 'Traps' },
-    'glutes': { side: 'back', color: '#8B5CF6', label: 'Glutes' },
-    'hamstrings': { side: 'back', color: '#EF4444', label: 'Hamstrings' },
-    'triceps': { side: 'back', color: '#F59E0B', label: 'Triceps' },
-    'calves': { side: 'back', color: '#EC4899', label: 'Calves' },
-    'lower back': { side: 'back', color: '#06B6D4', label: 'Lower Back' },
-  };
-  
-  const filteredMuscles = muscles.filter(muscle => {
-    const muscleInfo = muscleGroups[muscle.toLowerCase()];
-    if (!muscleInfo) return false;
-    
-    return muscle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           muscleInfo.label.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-
-  const handleMuscleClick = (muscle) => {
-    onSelect(muscle);
+    'Front': [
+      'Chest', 'Abs', 'Quadriceps', 'Biceps', 'Forearms', 'Calves', 'Shoulders'
+    ],
+    'Back': [
+      'Back', 'Lats', 'Traps', 'Hamstrings', 'Glutes', 'Triceps', 'Calves'
+    ],
+    'Full Body': [
+      'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Forearms',
+      'Abs', 'Obliques', 'Legs', 'Quadriceps', 'Hamstrings', 'Glutes', 'Calves', 'Lats', 'Traps'
+    ]
   };
 
-  const handleBodyClick = (muscle) => {
-    // Find the actual muscle name from our mapping
-    const foundMuscle = Object.entries(muscleGroups).find(
-      ([_, info]) => info.label.toLowerCase() === muscle.toLowerCase()
-    );
-    
-    if (foundMuscle) {
-      onSelect(foundMuscle[0]);
+  const [viewMode, setViewMode] = useState('Front');
+
+  // ============================================
+  // Muscle toggle handler
+  // ============================================
+
+  const toggleMuscle = (muscle) => {
+    if (selectedMuscles.includes(muscle)) {
+      onSelect(selectedMuscles.filter(m => m !== muscle));
+    } else {
+      onSelect([...selectedMuscles, muscle]);
     }
   };
 
-  const getBodyData = () => {
-    const front = [];
-    const back = [];
-    
-    selectedMuscles.forEach(muscle => {
-      const info = muscleGroups[muscle.toLowerCase()];
-      if (info) {
-        if (info.side === 'front') {
-          front.push({ 
-            name: info.label, 
-            color: info.color,
-            intensity: 1 
-          });
-        } else {
-          back.push({ 
-            name: info.label, 
-            color: info.color,
-            intensity: 1 
-          });
-        }
-      }
-    });
-    
-    return { front, back };
+  // Get color for muscle
+  const getMuscleColor = (muscle) => {
+    return muscleColors[muscle] || '#6B7280';
   };
 
-  return (
-    <div className="card animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-2">Target Muscles</h2>
-          <p className="text-gray-400">
-            Click on muscles to select them. You can select multiple muscle groups.
-          </p>
-        </div>
-        <div className="text-blue-500 bg-blue-500/10 p-3 rounded-lg">
-          <Activity className="w-8 h-8" />
-        </div>
-      </div>
-      
-      
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search muscles..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-field w-full pl-12"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-      </div>
-      
-      <div className="mb-8">
-        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-           
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-white mb-4">Front View</h3>
-              <div className="bg-gray-800 rounded-lg p-4">
-                <Body
-                  data={getBodyData().front}
-                  onClick={handleBodyClick}
-                  style={{ width: '200px', height: '400px' }}
-                  colors={['#3B82F6', '#10B981', '#8B5CF6', '#EF4444']}
-                  side="front"
-                />
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-white mb-4">Back View</h3>
-              <div className="bg-gray-800 rounded-lg p-4">
-                <Body
-                  data={getBodyData().back}
-                  onClick={handleBodyClick}
-                  style={{ width: '200px', height: '400px' }}
-                  colors={['#3B82F6', '#10B981', '#8B5CF6', '#EF4444']}
-                  side="back"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-6 text-center text-gray-400 text-sm">
-            <AlertCircle className="w-4 h-4 inline mr-2" />
-            Click directly on the body or use the muscle list below
-          </div>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        {filteredMuscles.map((muscle) => {
-          const info = muscleGroups[muscle.toLowerCase()];
-          const isSelected = selectedMuscles.includes(muscle);
-          
-          if (!info) return null;
-          
-          return (
-            <button
+  // ============================================
+  // Simple SVG Anatomy Map
+  // ============================================
+
+  const AnatomyMap = ({ view }) => {
+    const width = 200;
+    const height = 400;
+
+    if (view === 'Front') {
+      return (
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full max-w-sm mx-auto"
+          style={{ backgroundColor: '#1F2937', borderRadius: '12px' }}
+        >
+          {/* Head */}
+          <circle cx={width / 2} cy={30} r={15} fill="#666" opacity="0.5" />
+
+          {/* Chest - Clickable */}
+          {['Chest'].map(muscle => (
+            <rect
               key={muscle}
-              onClick={() => handleMuscleClick(muscle)}
-              className={`
-                flex items-center gap-3 p-3 rounded-lg border-2 transition-all duration-300
-                ${isSelected 
-                  ? 'border-blue-500 bg-blue-500/10 transform scale-105' 
-                  : 'border-gray-700 bg-gray-800/50 hover:border-blue-500/50 hover:bg-gray-800'
-                }
-              `}
-              style={isSelected ? { borderColor: info.color } : {}}
-            >
-              <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                style={{ backgroundColor: isSelected ? info.color : '#374151' }}
-              >
-                {info.label.charAt(0)}
-              </div>
-              
-              <div className="text-left flex-1">
-                <h4 className="font-semibold text-white capitalize">
-                  {info.label}
-                </h4>
-                <p className="text-xs text-gray-400 capitalize">
-                  {muscle}
-                </p>
-              </div>
-              
-              {isSelected && (
-                <div className="text-blue-500">
-                  ✓
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      {selectedMuscles.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-gray-800">
-          <h3 className="text-lg font-semibold text-white mb-3">
-            Selected Muscles ({selectedMuscles.length})
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {selectedMuscles.map((muscle) => {
-              const info = muscleGroups[muscle.toLowerCase()];
-              return (
-                <span
-                  key={muscle}
-                  className="muscle-badge"
-                  style={{
-                    backgroundColor: `${info?.color}20`,
-                    color: info?.color,
-                    borderColor: `${info?.color}40`
-                  }}
-                >
-                  {info?.label || muscle}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+              x={width / 2 - 30}
+              y={50}
+              width={60}
+              height={70}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="4"
+            />
+          ))}
 
-export default MuscleSelector;
-*/
+          {/* Shoulders - Left */}
+          {view === 'Front' && ['Shoulders'].map(muscle => (
+            <g key={`${muscle}-left`}>
+              <ellipse
+                cx={width / 2 - 40}
+                cy={60}
+                rx={15}
+                ry={20}
+                fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+                opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+                onClick={() => toggleMuscle(muscle)}
+                cursor="pointer"
+                style={{ transition: 'all 0.3s' }}
+              />
+            </g>
+          ))}
 
+          {/* Shoulders - Right */}
+          {view === 'Front' && ['Shoulders'].map(muscle => (
+            <g key={`${muscle}-right`}>
+              <ellipse
+                cx={width / 2 + 40}
+                cy={60}
+                rx={15}
+                ry={20}
+                fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+                opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+                onClick={() => toggleMuscle(muscle)}
+                cursor="pointer"
+                style={{ transition: 'all 0.3s' }}
+              />
+            </g>
+          ))}
 
+          {/* Biceps - Left */}
+          {['Biceps'].map(muscle => (
+            <rect
+              key={`${muscle}-left`}
+              x={width / 2 - 55}
+              y={70}
+              width={20}
+              height={60}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="3"
+            />
+          ))}
 
-import React, { useState } from 'react';
-import { Search, X, AlertCircle, Check } from 'lucide-react';
+          {/* Triceps - Right */}
+          {['Triceps'].map(muscle => (
+            <rect
+              key={`${muscle}-right`}
+              x={width / 2 + 35}
+              y={70}
+              width={20}
+              height={60}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="3"
+            />
+          ))}
 
-const MuscleSelector = ({ muscles, selectedMuscles, onSelect }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  // Muscle groups with colors and data mappings
-  const muscleGroups = {
-    // Front muscles
-    'pectorals': { side: 'front', color: '#3B82F6', label: 'Chest', position: 'top-32 left-1/2 transform -translate-x-1/2 w-24 h-24' },
-    'abdominals': { side: 'front', color: '#10B981', label: 'Abs', position: 'top-56 left-1/2 transform -translate-x-1/2 w-20 h-16' },
-    'quadriceps': { side: 'front', color: '#8B5CF6', label: 'Quads', position: 'top-80 left-1/2 transform -translate-x-1/2 w-16 h-24' },
-    'biceps': { side: 'front', color: '#EF4444', label: 'Biceps', position: 'top-40 left-1/4 w-8 h-16' },
-    'shoulders': { side: 'front', color: '#F59E0B', label: 'Shoulders', position: 'top-24 left-1/2 transform -translate-x-1/2 w-32 h-12' },
-    'forearms': { side: 'front', color: '#EC4899', label: 'Forearms', position: 'top-56 left-1/4 w-6 h-16' },
-    
-    // Back muscles
-    'lats': { side: 'back', color: '#3B82F6', label: 'Lats', position: 'top-40 left-1/2 transform -translate-x-1/2 w-20 h-24' },
-    'traps': { side: 'back', color: '#10B981', label: 'Traps', position: 'top-20 left-1/2 transform -translate-x-1/2 w-24 h-12' },
-    'glutes': { side: 'back', color: '#8B5CF6', label: 'Glutes', position: 'top-64 left-1/2 transform -translate-x-1/2 w-20 h-16' },
-    'hamstrings': { side: 'back', color: '#EF4444', label: 'Hamstrings', position: 'top-80 left-1/2 transform -translate-x-1/2 w-16 h-24' },
-    'triceps': { side: 'back', color: '#F59E0B', label: 'Triceps', position: 'top-40 left-3/4 w-8 h-16' },
-    'calves': { side: 'back', color: '#EC4899', label: 'Calves', position: 'top-96 left-1/2 transform -translate-x-1/2 w-12 h-12' },
-    'lower back': { side: 'back', color: '#06B6D4', label: 'Lower Back', position: 'top-56 left-1/2 transform -translate-x-1/2 w-24 h-12' },
-  };
-  
-  const filteredMuscles = muscles.filter(muscle => {
-    const muscleInfo = muscleGroups[muscle.toLowerCase()];
-    if (!muscleInfo) return false;
-    
-    return muscle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           muscleInfo.label.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+          {/* Forearms - Left */}
+          {['Forearms'].map(muscle => (
+            <rect
+              key={`${muscle}-left`}
+              x={width / 2 - 55}
+              y={130}
+              width={18}
+              height={50}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="3"
+            />
+          ))}
 
-  const handleMuscleClick = (muscle) => {
-    onSelect(muscle);
-  };
+          {/* Forearms - Right */}
+          {['Forearms'].map(muscle => (
+            <rect
+              key={`${muscle}-right`}
+              x={width / 2 + 37}
+              y={130}
+              width={18}
+              height={50}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="3"
+            />
+          ))}
 
-  // SVG Body Component
-  const BodySVG = ({ side, selectedMuscles }) => {
-    const isFront = side === 'front';
-    
-    const muscleElements = Object.entries(muscleGroups)
-      .filter(([_, info]) => info.side === side)
-      .map(([muscle, info]) => {
-        const isSelected = selectedMuscles.includes(muscle);
-        return (
-          <div
-            key={muscle}
-            className={`absolute ${info.position} rounded-lg cursor-pointer transition-all duration-300 transform hover:scale-110 ${
-              isSelected ? 'ring-4 ring-opacity-50' : 'hover:ring-2 hover:ring-opacity-30'
-            }`}
-            style={{
-              backgroundColor: isSelected ? info.color : `${info.color}40`,
-              border: `2px solid ${info.color}`,
-              zIndex: isSelected ? 10 : 1
-            }}
-            onClick={() => handleMuscleClick(muscle)}
-            title={info.label}
+          {/* Abs */}
+          {['Abs'].map(muscle => (
+            <rect
+              key={muscle}
+              x={width / 2 - 20}
+              y={120}
+              width={40}
+              height={50}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="3"
+            />
+          ))}
+
+          {/* Quadriceps */}
+          {['Quadriceps'].map(muscle => (
+            <rect
+              key={muscle}
+              x={width / 2 - 30}
+              y={170}
+              width={60}
+              height={80}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="4"
+            />
+          ))}
+
+          {/* Calves */}
+          {['Calves'].map(muscle => (
+            <rect
+              key={muscle}
+              x={width / 2 - 30}
+              y={250}
+              width={60}
+              height={60}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="4"
+            />
+          ))}
+
+          {/* Label */}
+          <text
+            x={width / 2}
+            y={height - 5}
+            textAnchor="middle"
+            fill="#9CA3AF"
+            fontSize="12"
           >
-            {isSelected && (
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                <Check className="w-4 h-4 text-black" />
-              </div>
-            )}
-            <div className="h-full flex items-center justify-center">
-              <span className="text-white font-bold text-xs">{info.label}</span>
-            </div>
-          </div>
-        );
-      });
+            Front View - Click to select
+          </text>
+        </svg>
+      );
+    } else if (view === 'Back') {
+      return (
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full max-w-sm mx-auto"
+          style={{ backgroundColor: '#1F2937', borderRadius: '12px' }}
+        >
+          {/* Head */}
+          <circle cx={width / 2} cy={30} r={15} fill="#666" opacity="0.5" />
 
-    return (
-      <div className="relative w-64 h-96 bg-gray-800 rounded-lg p-4">
-        {/* Body Outline */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          {isFront ? (
-            // Front body SVG outline
-            <svg width="200" height="400" viewBox="0 0 200 400" className="opacity-20">
-              {/* Head */}
-              <ellipse cx="100" cy="50" rx="30" ry="40" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              {/* Neck */}
-              <rect x="85" y="90" width="30" height="20" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              {/* Torso */}
-              <path d="M70,110 L130,110 L140,200 L130,290 L70,290 L60,200 Z" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              {/* Arms */}
-              <rect x="30" y="120" width="40" height="120" rx="20" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              <rect x="130" y="120" width="40" height="120" rx="20" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              {/* Legs */}
-              <rect x="70" y="290" width="20" height="110" rx="10" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              <rect x="110" y="290" width="20" height="110" rx="10" fill="none" stroke="#4B5563" strokeWidth="2"/>
-            </svg>
-          ) : (
-            // Back body SVG outline
-            <svg width="200" height="400" viewBox="0 0 200 400" className="opacity-20">
-              {/* Head */}
-              <ellipse cx="100" cy="50" rx="30" ry="40" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              {/* Neck */}
-              <rect x="85" y="90" width="30" height="20" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              {/* Back */}
-              <path d="M70,110 L130,110 L140,250 L130,290 L70,290 L60,250 Z" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              {/* Arms */}
-              <rect x="30" y="120" width="40" height="120" rx="20" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              <rect x="130" y="120" width="40" height="120" rx="20" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              {/* Legs */}
-              <rect x="70" y="290" width="20" height="110" rx="10" fill="none" stroke="#4B5563" strokeWidth="2"/>
-              <rect x="110" y="290" width="20" height="110" rx="10" fill="none" stroke="#4B5563" strokeWidth="2"/>
-            </svg>
-          )}
-        </div>
-        
-        {/* Muscle overlays */}
-        {muscleElements}
-      </div>
-    );
+          {/* Back */}
+          {['Back'].map(muscle => (
+            <rect
+              key={muscle}
+              x={width / 2 - 30}
+              y={50}
+              width={60}
+              height={80}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="4"
+            />
+          ))}
+
+          {/* Traps */}
+          {['Traps'].map(muscle => (
+            <polygon
+              key={muscle}
+              points={`${width / 2},50 ${width / 2 - 40},80 ${width / 2 + 40},80`}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+            />
+          ))}
+
+          {/* Lats */}
+          {['Lats'].map(muscle => (
+            <g key={muscle}>
+              <ellipse
+                cx={width / 2 - 40}
+                cy={110}
+                rx={15}
+                ry={40}
+                fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+                opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+                onClick={() => toggleMuscle(muscle)}
+                cursor="pointer"
+                style={{ transition: 'all 0.3s' }}
+              />
+              <ellipse
+                cx={width / 2 + 40}
+                cy={110}
+                rx={15}
+                ry={40}
+                fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+                opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+                onClick={() => toggleMuscle(muscle)}
+                cursor="pointer"
+                style={{ transition: 'all 0.3s' }}
+              />
+            </g>
+          ))}
+
+          {/* Triceps - Back view */}
+          {['Triceps'].map(muscle => (
+            <g key={muscle}>
+              <rect
+                x={width / 2 - 55}
+                y={70}
+                width={20}
+                height={60}
+                fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+                opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+                onClick={() => toggleMuscle(muscle)}
+                cursor="pointer"
+                style={{ transition: 'all 0.3s' }}
+                rx="3"
+              />
+              <rect
+                x={width / 2 + 35}
+                y={70}
+                width={20}
+                height={60}
+                fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+                opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+                onClick={() => toggleMuscle(muscle)}
+                cursor="pointer"
+                style={{ transition: 'all 0.3s' }}
+                rx="3"
+              />
+            </g>
+          ))}
+
+          {/* Hamstrings */}
+          {['Hamstrings'].map(muscle => (
+            <rect
+              key={muscle}
+              x={width / 2 - 30}
+              y={170}
+              width={60}
+              height={60}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="4"
+            />
+          ))}
+
+          {/* Glutes */}
+          {['Glutes'].map(muscle => (
+            <ellipse
+              key={muscle}
+              cx={width / 2}
+              cy={165}
+              rx={35}
+              ry={25}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+            />
+          ))}
+
+          {/* Calves - Back */}
+          {['Calves'].map(muscle => (
+            <rect
+              key={muscle}
+              x={width / 2 - 30}
+              y={230}
+              width={60}
+              height={60}
+              fill={selectedMuscles.includes(muscle) ? getMuscleColor(muscle) : '#444'}
+              opacity={selectedMuscles.includes(muscle) ? 0.8 : 0.4}
+              onClick={() => toggleMuscle(muscle)}
+              cursor="pointer"
+              style={{ transition: 'all 0.3s' }}
+              rx="4"
+            />
+          ))}
+
+          {/* Label */}
+          <text
+            x={width / 2}
+            y={height - 5}
+            textAnchor="middle"
+            fill="#9CA3AF"
+            fontSize="12"
+          >
+            Back View - Click to select
+          </text>
+        </svg>
+      );
+    }
+
+    return null;
   };
 
+  // ============================================
+  // Render
+  // ============================================
+
   return (
-    <div className="card animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-2">Target Muscles</h2>
-          <p className="text-gray-400">
-            Click on muscles to select them. You can select multiple muscle groups.
-          </p>
-        </div>
-        <div className="text-blue-500 bg-blue-500/10 p-3 rounded-lg">
-          <AlertCircle className="w-8 h-8" />
-        </div>
-      </div>
-      
-      {/* Search */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Search muscles..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-field w-full pl-12"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-3">
+        <h2 className="text-3xl md:text-4xl font-bold text-white">
+          Select Target Muscles
+        </h2>
+        <p className="text-gray-400 text-lg">
+          Click on the anatomy map or use the buttons below to select which muscles you want to train.
+        </p>
+        <div className="inline-flex items-center gap-2 bg-blue-600/20 border border-blue-600 text-blue-200 px-4 py-2 rounded-lg text-sm">
+          <Info size={16} />
+          <span>Select at least one muscle group to continue</span>
         </div>
       </div>
-      
-      {/* Muscle Visualization */}
-      <div className="mb-8">
-        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-            {/* Front Body */}
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-white mb-4">Front View</h3>
-              <BodySVG side="front" selectedMuscles={selectedMuscles} />
-            </div>
-            
-            {/* Back Body */}
-            <div className="text-center">
-              <h3 className="text-lg font-semibold text-white mb-4">Back View</h3>
-              <BodySVG side="back" selectedMuscles={selectedMuscles} />
-            </div>
-          </div>
-          
-          <div className="mt-6 text-center text-gray-400 text-sm">
-            <AlertCircle className="w-4 h-4 inline mr-2" />
-            Click directly on the colored muscle areas or use the muscle list below
-          </div>
-        </div>
+
+      {/* View toggle buttons */}
+      <div className="flex gap-3 justify-center flex-wrap">
+        {['Front', 'Back'].map(view => (
+          <button
+            key={view}
+            onClick={() => setViewMode(view)}
+            className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+              viewMode === view
+                ? 'bg-red-600 text-white shadow-lg shadow-red-600/50'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            {view} View
+          </button>
+        ))}
       </div>
-      
-      {/* Muscle Selection Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        {filteredMuscles.map((muscle) => {
-          const info = muscleGroups[muscle.toLowerCase()];
-          const isSelected = selectedMuscles.includes(muscle);
-          
-          if (!info) return null;
-          
-          return (
+
+      {/* Anatomy Map */}
+      <div className="flex justify-center bg-gray-800 rounded-xl p-8 border border-gray-700">
+        <AnatomyMap view={viewMode} />
+      </div>
+
+      {/* Muscle button grid */}
+      <div className="space-y-4">
+        <h3 className="font-semibold text-white">Or select from list:</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {muscleGroups[viewMode].map((muscle) => (
             <button
               key={muscle}
-              onClick={() => handleMuscleClick(muscle)}
-              className={`
-                flex items-center gap-3 p-3 rounded-lg border-2 transition-all duration-300
-                ${isSelected 
-                  ? 'border-blue-500 bg-blue-500/10 transform scale-105' 
-                  : 'border-gray-700 bg-gray-800/50 hover:border-blue-500/50 hover:bg-gray-800'
-                }
-              `}
-              style={isSelected ? { borderColor: info.color } : {}}
+              onClick={() => toggleMuscle(muscle)}
+              className={`px-4 py-3 rounded-lg font-semibold text-sm transition-all hover-lift ${
+                selectedMuscles.includes(muscle)
+                  ? 'bg-red-600 text-white border border-red-500 shadow-lg shadow-red-600/50'
+                  : 'bg-gray-800 text-gray-300 border border-gray-700 hover:border-red-600'
+              }`}
+              style={{
+                backgroundColor: selectedMuscles.includes(muscle)
+                  ? getMuscleColor(muscle)
+                  : undefined
+              }}
             >
-              <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                style={{ backgroundColor: isSelected ? info.color : '#374151' }}
-              >
-                {info.label.charAt(0)}
-              </div>
-              
-              <div className="text-left flex-1">
-                <h4 className="font-semibold text-white capitalize">
-                  {info.label}
-                </h4>
-                <p className="text-xs text-gray-400 capitalize">
-                  {muscle}
-                </p>
-              </div>
-              
-              {isSelected && (
-                <div className="text-blue-500">
-                  ✓
-                </div>
-              )}
+              {muscle}
             </button>
-          );
-        })}
+          ))}
+        </div>
       </div>
-      
-      {/* Selected Muscles Summary */}
+
+      {/* Selected muscles display */}
       {selectedMuscles.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-gray-800">
-          <h3 className="text-lg font-semibold text-white mb-3">
-            Selected Muscles ({selectedMuscles.length})
-          </h3>
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-white">Selected Muscles:</h3>
+            <span className="badge bg-red-600 text-white">
+              {selectedMuscles.length} selected
+            </span>
+          </div>
           <div className="flex flex-wrap gap-2">
-            {selectedMuscles.map((muscle) => {
-              const info = muscleGroups[muscle.toLowerCase()];
-              return (
-                <span
-                  key={muscle}
-                  className="muscle-badge"
-                  style={{
-                    backgroundColor: `${info?.color}20`,
-                    color: info?.color,
-                    borderColor: `${info?.color}40`
-                  }}
-                >
-                  {info?.label || muscle}
-                </span>
-              );
-            })}
+            {selectedMuscles.map((muscle) => (
+              <div
+                key={muscle}
+                className="badge text-white cursor-pointer hover-lift transition-all"
+                style={{ backgroundColor: getMuscleColor(muscle) }}
+                onClick={() => toggleMuscle(muscle)}
+                title={`Click to remove ${muscle}`}
+              >
+                {muscle} ✕
+              </div>
+            ))}
           </div>
         </div>
       )}
+
+      {/* Continue button */}
+      <div className="flex gap-4 justify-center">
+        <button
+          onClick={onContinue}
+          disabled={selectedMuscles.length === 0 || loading}
+          className={`btn px-8 py-3 text-lg font-semibold rounded-lg flex items-center gap-3 transition-all ${
+            selectedMuscles.length === 0 || loading
+              ? 'btn-disabled'
+              : 'btn-primary hover:shadow-lg hover:shadow-red-600/50'
+          }`}
+        >
+          <span>Find Exercises</span>
+          <ArrowRight size={20} />
+        </button>
+      </div>
+
+      {/* Info */}
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-gray-300 text-sm space-y-2">
+        <h4 className="font-semibold text-white mb-3">💡 Muscle Selection Tips:</h4>
+        <ul className="space-y-1 list-disc list-inside">
+          <li>Click on muscle areas in the anatomy map or use the buttons</li>
+          <li>Multi-select: Choose multiple muscles for a full-body workout</li>
+          <li>More selections = More exercise variety</li>
+          <li>Exercises will target primary and secondary muscles</li>
+        </ul>
+      </div>
     </div>
   );
 };

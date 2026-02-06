@@ -2,65 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#111827" />
     <meta
       name="description"
-      content="Muscle Dynamics - Gym Workout Generator"
+      content="💪 Muscle Dynamics - AI-powered gym workout generator. Select equipment, choose target muscles, get personalized exercises."
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>Muscle Dynamics - Gym Workout Generator</title>
-    <style>
-      /* Loading screen styles */
-      body {
-        margin: 0;
-        background-color: #0f172a;
-        color: white;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-          sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      }
-
-      .loading-spinner {
-        width: 50px;
-        height: 50px;
-        border: 5px solid rgba(239, 68, 68, 0.3);
-        border-radius: 50%;
-        border-top-color: #ef4444;
-        animation: spin 1s ease-in-out infinite;
-        margin-bottom: 20px;
-      }
-
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-
-      .loading-text {
-        font-size: 1.2rem;
-        color: #9ca3af;
-      }
-    </style>
+    <title>💪 Muscle Dynamics - Workout Generator</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root">
-      <div class="loading-container">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Loading Muscle Dynamics...</div>
-      </div>
-    </div>
+    <div id="root"></div>
   </body>
 </html>

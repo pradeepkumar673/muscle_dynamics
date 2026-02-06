@@ -1,87 +1,36 @@
+// ===================================
+// 💪 Navbar Component
+// ===================================
+// Header navigation - Logo, title, reset button
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { RotateCcw } from 'lucide-react';
 
-const Navbar = () => {
-  const navStyle = {
-    backgroundColor: 'rgba(15, 23, 42, 0.8)',
-    backdropFilter: 'blur(12px)',
-    borderBottom: '1px solid #374151',
-    position: 'sticky',
-    top: 0,
-    zIndex: 40,
-    padding: '0 1rem'
-  };
-
-  const containerStyle = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: '64px'
-  };
-
-  const logoStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    textDecoration: 'none'
-  };
-
-  const logoCircleStyle = {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: 'bold',
-    fontSize: '20px',
-    color: 'white'
-  };
-
-  const navItemsStyle = {
-    display: 'flex',
-    gap: '24px',
-    alignItems: 'center'
-  };
-
-  const navLinkStyle = {
-    color: '#9ca3af',
-    textDecoration: 'none',
-    fontSize: '14px',
-    fontWeight: '500',
-    transition: 'color 0.3s'
-  };
-
-  const donateButtonStyle = {
-    background: '#ef4444',
-    color: 'white',
-    padding: '8px 16px',
-    borderRadius: '6px',
-    border: 'none',
-    fontWeight: '500',
-    cursor: 'pointer',
-    fontSize: '14px'
-  };
-
+const Navbar = ({ onReset }) => {
   return (
-    <nav style={navStyle}>
-      <div style={containerStyle}>
-        <Link to="/" style={logoStyle}>
-          <div style={logoCircleStyle}>M</div>
-          <div>
-            <div style={{ fontWeight: 'bold', color: 'white' }}>Muscle Dynamics</div>
-            <div style={{ fontSize: '12px', color: '#9ca3af' }}>Build Your Perfect Workout</div>
+    <nav className="bg-gray-800 border-b border-gray-700 sticky top-0 z-50 shadow-lg">
+      <div className="container mx-auto px-4 py-4 max-w-6xl">
+        <div className="flex items-center justify-between">
+          {/* Logo + Title - Left side */}
+          <div className="flex items-center gap-3">
+            <div className="text-3xl">💪</div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">
+                Muscle <span className="text-red-600">Dynamics</span>
+              </h1>
+              <p className="text-xs text-gray-400">AI Workout Generator</p>
+            </div>
           </div>
-        </Link>
-        
-        <div style={navItemsStyle}>
-          <Link to="/" style={navLinkStyle}>Home</Link>
-          <Link to="/workouts" style={navLinkStyle}>Workouts</Link>
-          <Link to="/stats" style={navLinkStyle}>Statistics</Link>
-          <button style={donateButtonStyle}>Donate</button>
+
+          {/* Reset button - Right side */}
+          <button
+            onClick={onReset}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors duration-200 hover-lift"
+            title="Reset and start over"
+          >
+            <RotateCcw size={18} />
+            <span className="hidden sm:inline font-semibold">Reset</span>
+          </button>
         </div>
       </div>
     </nav>

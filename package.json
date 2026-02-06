@@ -1,16 +1,24 @@
 {
   "name": "muscle-dynamics",
   "version": "1.0.0",
-  "private": true,
+  "description": "AI-powered gym workout generator with MERN stack",
+  "main": "server/server.js",
   "scripts": {
-    "setup": "npm install && cd server && npm install && cd ../client && npm install",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && npm run dev",
+    "dev": "concurrently \"cd server && npm start\" \"cd client && npm start\"",
+    "server": "cd server && npm start",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
-    "start": "cd server && npm start",
-    "heroku-postbuild": "cd client && npm install && npm run build"
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install"
   },
+  "keywords": [
+    "gym",
+    "workout",
+    "exercise",
+    "fitness",
+    "mern"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.0"
   }
