@@ -29,14 +29,14 @@ const App = () => {
   // App container style
   const appStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    backgroundColor: '#0f172a',
     color: 'white'
   };
 
   const containerStyle = {
     maxWidth: '1200px',
     margin: '0 auto',
-    padding: '2rem 1rem'
+    padding: '32px 16px'
   };
 
   // Fetch unique filters on mount
@@ -204,37 +204,6 @@ const App = () => {
     }
   };
 
-  // Button styles
-  const primaryButtonStyle = {
-    backgroundColor: '#dc2626',
-    color: 'white',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    border: 'none',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontSize: '16px',
-    transition: 'all 0.3s'
-  };
-
-  const secondaryButtonStyle = {
-    backgroundColor: '#374151',
-    color: 'white',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    border: '1px solid #4b5563',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontSize: '16px',
-    transition: 'all 0.3s'
-  };
-
-  const disabledButtonStyle = {
-    ...primaryButtonStyle,
-    opacity: 0.5,
-    cursor: 'not-allowed'
-  };
-
   return (
     <Router>
       <div style={appStyle}>
@@ -244,17 +213,15 @@ const App = () => {
           {/* Wizard Header */}
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <h1 style={{ 
-              fontSize: '2.25rem', 
+              fontSize: '36px', 
               fontWeight: 'bold', 
-              background: 'linear-gradient(to right, #ef4444, #dc2626)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: '#ef4444',
               marginBottom: '16px'
             }}>
               Muscle Dynamics
             </h1>
             <p style={{ color: '#9ca3af', maxWidth: '500px', margin: '0 auto 32px' }}>
-              Build your perfect workout in 3 simple steps. Select equipment, target muscles, and choose exercises.
+              Build your perfect workout in 3 simple steps.
             </p>
             
             <WizardSteps currentStep={currentStep} />
@@ -278,37 +245,44 @@ const App = () => {
               <button
                 onClick={handlePrevStep}
                 disabled={currentStep === 1}
-                style={{ ...secondaryButtonStyle, opacity: currentStep === 1 ? 0.3 : 1 }}
+                style={{ 
+                  backgroundColor: '#374151',
+                  color: 'white',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  border: '1px solid #4b5563',
+                  opacity: currentStep === 1 ? 0.3 : 1
+                }}
               >
                 Previous
               </button>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                {currentStep === 1 && (
-                  <span style={{ color: '#6b7280', fontSize: '14px' }}>
-                    Selected: {selectedEquipment.length} equipment
-                  </span>
-                )}
-                {currentStep === 2 && (
-                  <span style={{ color: '#6b7280', fontSize: '14px' }}>
-                    Selected: {selectedMuscles.length} muscles
-                  </span>
-                )}
-                {currentStep === 3 && (
-                  <span style={{ color: '#6b7280', fontSize: '14px' }}>
-                    Selected: {selectedExercises.length} exercises
-                  </span>
-                )}
+                <span style={{ color: '#6b7280', fontSize: '14px' }}>
+                  {currentStep === 1 && `Selected: ${selectedEquipment.length} equipment`}
+                  {currentStep === 2 && `Selected: ${selectedMuscles.length} muscles`}
+                  {currentStep === 3 && `Selected: ${selectedExercises.length} exercises`}
+                </span>
                 
                 <button
                   onClick={currentStep === 3 ? generateWorkout : handleNextStep}
-                  style={
-                    (currentStep === 1 && selectedEquipment.length === 0) ||
-                    (currentStep === 2 && selectedMuscles.length === 0) ||
-                    (currentStep === 3 && selectedExercises.length === 0)
-                      ? disabledButtonStyle
-                      : primaryButtonStyle
-                  }
+                  style={{ 
+                    backgroundColor: '#dc2626',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    opacity: (
+                      (currentStep === 1 && selectedEquipment.length === 0) ||
+                      (currentStep === 2 && selectedMuscles.length === 0) ||
+                      (currentStep === 3 && selectedExercises.length === 0)
+                    ) ? 0.5 : 1,
+                    cursor: (
+                      (currentStep === 1 && selectedEquipment.length === 0) ||
+                      (currentStep === 2 && selectedMuscles.length === 0) ||
+                      (currentStep === 3 && selectedExercises.length === 0)
+                    ) ? 'not-allowed' : 'pointer'
+                  }}
                   disabled={
                     (currentStep === 1 && selectedEquipment.length === 0) ||
                     (currentStep === 2 && selectedMuscles.length === 0) ||
