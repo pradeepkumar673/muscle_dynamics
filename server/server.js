@@ -4,6 +4,9 @@
 // MERN stack backend - Node.js + Express + MongoDB
 // Tamizh+English Comments
 
+
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');

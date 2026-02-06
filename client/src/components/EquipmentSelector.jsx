@@ -6,7 +6,7 @@
 import React from 'react';
 import {
   Dumbbell,
-  Weight,
+  Barbell,
   Zap,
   Couch,
   Wind,
@@ -27,19 +27,19 @@ const EquipmentSelector = ({
 
   const equipmentIcons = {
     'Dumbbell': Dumbbell,
-    'Barbell': Weight,
+    'Barbell': Barbell,
     'Kettlebell': Circle,
     'Machine': Zap,
     'Cable': Wind,
     'Bench': Couch,
     'Bodyweight': Circle,
     'Medicine Ball': Circle,
-    'EZ Bar': Weight,
+    'EZ Bar': Barbell,
     'Resistance Band': Wind,
     'Smith Machine': Zap,
     'Foam Roll': Circle,
     'Pull-up Bar': Circle,
-    'Trap Bar': Weight,
+    'Trap Bar': Barbell,
   };
 
   // Get icon for equipment - Default use pannatum
